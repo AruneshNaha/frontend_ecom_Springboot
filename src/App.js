@@ -1,24 +1,42 @@
-import logo from './logo.svg';
 import './App.css';
+import Card from './Components/Card';
+
+import { useState, useEffect } from 'react';
+import { getAllProducts } from './Controllers/ProductController';
 
 function App() {
+  const [products, setProducts] = useState([]);
+
+  const getProducts = async () => {
+    const productList = await getAllProducts();
+    setProducts(productList);
+  };
+
+  useEffect(() => {
+    getProducts();
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      {
+        products.length > 0 ? (
+          <div className="container d-flex flex-wrap align-content-around">
+            {
+              products.map((product, index) => (
+                <Card key={index}
+                  productID={product.id}
+                  productName={product.name}
+                  productBrand={product.brand}
+                  productDescription={product.description}
+                  productPrice={product.price} />
+              ))
+            }
+          </div>
+        ) : (
+          <h3 className='justify-content-center'>Loading...</h3>
+        )
+      }
+    </>
   );
 }
 
