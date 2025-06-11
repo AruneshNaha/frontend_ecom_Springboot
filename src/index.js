@@ -7,6 +7,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { ProductDetails } from './Pages/ProductDetails';
 import Navbar from './Components/Navbar';
 import AddProducts from './Pages/AddProducts';
+import EditProduct from './Pages/EditProduct';
 
 function AppRouter() {
   return (
@@ -17,6 +18,7 @@ function AppRouter() {
           <Route path="/" element={<App />} />
           <Route path="/productDetails/:id" element={<ProductDetails />} />
           <Route path="/addProducts" element={<AddProducts />} />
+          <Route path="/editProduct/:id" element={<EditProduct />} />
           {/* Add more routes as needed */}
         </Routes>
       </BrowserRouter>

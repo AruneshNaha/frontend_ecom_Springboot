@@ -1,7 +1,13 @@
-import React, { useState, useRef } from 'react';
-import { addProduct } from '../Controllers/ProductController';
+import { useState, useRef, useEffect } from 'react';
+import axios from 'axios';
+import { editProduct, getProductByID } from '../Controllers/ProductController';
+import { useNavigate, useParams } from 'react-router-dom';
 
-function AddProducts() {
+function EditProduct() {
+
+  const { id } = useParams();
+  const navigate = useNavigate();
+
   const [product, setProduct] = useState({
     name: '',
     description: '',
@@ -10,6 +16,7 @@ function AddProducts() {
     category: '',
     quantity: ''
   });
+  const [imagePreview, setImagePreview] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const fileInputRef = useRef(null); // Add this line
 
@@ -19,6 +26,9 @@ function AddProducts() {
 
   const handleFileChange = (e) => {
     setImageFile(e.target.files[0]);
+    if (e.target.files[0]) {
+      setImagePreview(URL.createObjectURL(e.target.files[0]));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -27,26 +37,39 @@ function AddProducts() {
     const formData = new FormData();
     formData.append('product', new Blob([JSON.stringify(product)], { type: 'application/json' }));
     formData.append('imageFile', imageFile);
-
-    addProduct(formData).then(() => {
-      setProduct({
-        name: '',
-        description: '',
-        brand: '',
-        price: '',
-        category: '',
-        quantity: ''
-      });
-      setImageFile(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''; // Clear file input
-      }
-    })
+    editProduct(id, formData).then(() => {
+      navigate('/');
+    }).catch((error) => {
+      console.log(error)
+    });
   };
+
+  useEffect(() => {
+    getProductByID(id).then((data) => {
+      setProduct({
+        name: data.name,
+        description: data.description,
+        brand: data.brand,
+        price: data.price,
+        category: data.category,
+        quantity: data.quantity
+      });
+    })
+
+    setImagePreview(axios.get(`http://localhost:8080/api/product/image/${id}`, { responseType: 'blob' })
+      .then(response => {
+        setImagePreview(URL.createObjectURL(response.data));
+      })
+      .catch(error => {
+        console.error("Error fetching product image:", error);
+      }));
+  }, [id])
+
+
 
   return (
     <div className="container mt-4">
-      <h3>Add New Product</h3>
+      <h3>Edit this Product</h3>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
           <label className="form-label">Name</label>
@@ -73,6 +96,14 @@ function AddProducts() {
           <input type="number" name="quantity" className="form-control" onChange={handleChange} value={product.quantity} required />
         </div>
         <div className="mb-3">
+          {imagePreview && (
+            <div className="mb-2">
+              <img
+                src={imagePreview}
+                alt="Current Product"
+                style={{ width: "150px", height: "150px" }} />
+            </div>
+          )}
           <label className="form-label">Product Image</label>
           <input
             type="file"
@@ -80,14 +111,15 @@ function AddProducts() {
             className="form-control"
             onChange={handleFileChange}
             accept="image/*"
+            // value={imageFile}
             required
             ref={fileInputRef} // Add this line
           />
         </div>
-        <button type="submit" className="btn btn-primary">Add Product</button>
+        <button type="submit" className="btn btn-primary">Update Product</button>
       </form>
     </div>
   );
 }
 
-export default AddProducts;
+export default EditProduct;

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { getProductByID } from '../Controllers/ProductController';
+import { useParams, useNavigate } from 'react-router-dom'
+import { deleteProductByID, getProductByID } from '../Controllers/ProductController';
 
 export const ProductDetails = () => {
 
   const { id } = useParams();
+  const navigate = useNavigate();
   const [product, setProduct] = useState({});
 
   useEffect(() => {
@@ -48,8 +49,27 @@ export const ProductDetails = () => {
               <h4 className="card-subtitle mb-2 text-body-secondary">{product.brand}</h4>
               <p className="card-text">{product.description}</p>
               <strong>Rs. {product.price}</strong>
+              <div className="card-text">Items left in stock: {product.quantity}</div>
               <br />
               <p className='card-text'>Released date: {formatDate(product.releaseDate)}</p>
+              <br />
+              <div className="card-body d-flex gap-3">
+                <button
+                  className="btn btn-warning"
+                  onClick={() => window.location.href = `/editProduct/${product.id}`}
+                >
+                  Edit this product
+                </button>
+                <button
+                  className="btn btn-danger"
+                  onClick={() => {
+                    deleteProductByID(product.id);
+                    navigate('/', { replace: true }); // Redirect to home page after deletion 
+                  }}
+                >
+                  Delete this product
+                </button>
+              </div>
             </div>
           </div>
         </div>
